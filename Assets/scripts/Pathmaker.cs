@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using UnityEditor;
 using UnityEngine;
 
 // MAZE PROC GEN LAB
@@ -11,16 +12,67 @@ using UnityEngine;
 
 public class Pathmaker : MonoBehaviour {
 
-// STEP 2: ============================================================================================
-// translate the pseudocode below
+	// STEP 2: ============================================================================================
+	// translate the pseudocode below
 
-//	DECLARE CLASS MEMBER VARIABLES:
-//	Declare a private integer called counter that starts at 0; 		// counter will track how many floor tiles I've instantiated
-//	Declare a public Transform called floorPrefab, assign the prefab in inspector;
-//	Declare a public Transform called pathmakerSpherePrefab, assign the prefab in inspector; 		// you'll have to make a "pathmakerSphere" prefab later
+	//	DECLARE CLASS MEMBER VARIABLES:
+	//	Declare a private integer called counter that starts at 0; 		// counter will track how many floor tiles I've instantiated
+	//	Declare a public Transform called floorPrefab, assign the prefab in inspector;
+	//	Declare a public Transform called pathmakerSpherePrefab, assign the prefab in inspector; 		// you'll have to make a "pathmakerSphere" prefab later
 
+	public int counter1 = 0;
+	public Script_manager manager;
+	public Transform floorPrefab;
+	public Transform floorPrefab2;
+	public Transform floorPrefab3;
+	public Transform pathmakerSpherePrefab;
+	public float movement = 5f;
+	public int life = 50;
 
-	void Update () {
+	void Start()
+    {
+		manager = Camera.main.GetComponent<Script_manager>();
+		life += Random.Range(-20, 20);
+    }
+	void Update() {
+        if (manager.reached)
+        {
+			Destroy(gameObject);
+        }
+		if (counter1 < life) {
+			float ran = Random.Range(0.0f, 1.0f);
+            if (ran < 0.08f)
+            {
+				transform.Rotate(0f, 90f, 0f, Space.World);
+            }
+			else if(ran< 0.16f)
+            {
+				transform.Rotate(0f, -90f, 0f, Space.World);
+            }
+            else if(ran>0.92f)
+            {
+				//print("birth");
+				Instantiate(pathmakerSpherePrefab,transform.position,transform.rotation);
+            }
+			//overlap check
+			Collider[] hitColliders = Physics.OverlapSphere(transform.position, movement/2-1);
+            //print(hitColliders.Length);
+            if (hitColliders.Length < 2) {
+				float ran2 = Random.Range(0, 3);
+                if (ran2 < 1) { manager.tiles.Add(Instantiate(floorPrefab, transform.position, Quaternion.Euler(0f, 0f, 0f))); }
+				else if (ran2 < 2) { manager.tiles.Add(Instantiate(floorPrefab2, transform.position, Quaternion.Euler(0f, 0f, 0f))); }
+				else if (ran2 < 3) { manager.tiles.Add(Instantiate(floorPrefab3, transform.position, Quaternion.Euler(0f, 0f, 0f))); }
+				counter1++; 
+			}
+			transform.Translate(movement * Mathf.Cos(transform.rotation.z), movement * Mathf.Sin(transform.rotation.z), 0);
+			
+        }
+        else
+        {
+            //print("destroying");
+            //if (manager.tiles.Count < manager.maxTiles) { Instantiate(pathmakerSpherePrefab, transform.position, transform.rotation); }
+			Destroy(gameObject);
+        }
 //		If counter is less than 50, then:
 //			Generate a random number from 0.0f to 1.0f;
 //			If random number is less than 0.25f, then rotate myself 90 degrees;
@@ -88,7 +140,7 @@ public class Pathmaker : MonoBehaviour {
 // AVOID SPAWNING A TILE IN THE SAME PLACE AS ANOTHER TILE  https://docs.unity3d.com/ScriptReference/Physics.OverlapSphere.html
 // Check out the Physics.OverlapSphere functionality... 
 //     If the collider is overlapping any others (the tile prefab has one), prevent a new tile from spawning and move forward one space. 
-
+ 
 // DYNAMIC CAMERA:
 // position the camera to center itself based on your generated world...
 // 1. keep a list of all your spawned tiles
